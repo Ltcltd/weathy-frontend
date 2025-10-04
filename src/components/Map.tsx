@@ -11,9 +11,9 @@ export default function Map() {
     if (!mapContainer.current) return;
 
     const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json", // free demo style
-      center: [78.4867, 17.385], // Hyderabad coords
+      container: mapContainer.current!,
+      style: "https://tiles.openfreemap.org/styles/bright", // richer style
+      center: [78.4867, 17.385], // Hyderabad
       zoom: 5,
     });
 
@@ -21,6 +21,10 @@ export default function Map() {
   }, []);
 
   return (
-    <div ref={mapContainer} className="w-full h-[500px] rounded-lg shadow-md" />
+    <div
+      ref={mapContainer}
+      className="w-full h-full"
+      style={{ height: "100%" }}
+    />
   );
 }
