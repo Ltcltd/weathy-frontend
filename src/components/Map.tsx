@@ -28,6 +28,12 @@ export default function Map({ onCitySelect }: Props) {
         layers: ["poi_r20"],
       });
 
+      // Debug: log features on click
+      console.log(
+        "POI features:",
+        features.map((f) => f.properties)
+      );
+
       const cityFeature = features.find((f) => {
         const name = f.properties?.name;
         const kind = f.properties?.kind;
@@ -46,17 +52,7 @@ export default function Map({ onCitySelect }: Props) {
       const layers = map.getStyle().layers;
       console.log(
         "Available layers:",
-        layers.map((l) => l.id)
-      );
-    });
-
-    map.on("click", (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ["poi_r20"],
-      });
-      console.log(
-        "POI features:",
-        features.map((f) => f.properties)
+        layers?.map((l) => l.id)
       );
     });
 
