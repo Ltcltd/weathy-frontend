@@ -5,7 +5,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 type Props = {
-  onCitySelect: (city: string) => void;
+  onCitySelect: (data: { city: string; lat: number; lon: number }) => void;
 };
 
 export default function Map({ onCitySelect }: Props) {
@@ -26,13 +26,25 @@ export default function Map({ onCitySelect }: Props) {
       const features = map.queryRenderedFeatures(e.point);
 
       const labelFeature = features.find(
-        (f) => f.layer.type === "symbol" && f.properties?.name // or f.properties?.text
+        (f) =>
+          f.layer.type === "symbol" &&
+          f.properties?.name &&
+          f.geometry.type === "Point"
       );
 
-      if (labelFeature) {
-        console.log("Clicked label:", labelFeature.properties.name);
+      if (labelFeature && labelFeature.geometry.type === "Point") {
+        let coord = labelFeature.geometry.coordinates as [number, number];
+        const coords = [Math.round(coord[0]), Math.round(coord[1])];
+        const label = labelFeature.properties.name;
+        const lat = coords[1];
+        const lon = coords[0];
+
+        console.log(`Clicked label: ${label}`);
+        console.log(`Label coordinates: ${lat}, ${lon}`);
+
+        onCitySelect({ city: label, lat, lon });
       } else {
-        console.log("No label found at click point");
+        console.log("No label with coordinates found at click point");
       }
     });
 

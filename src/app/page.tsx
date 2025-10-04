@@ -3,6 +3,15 @@
 import { useState } from "react";
 import WeatherCard from "@/components/WeatherCard";
 import MapWrapper from "./_components/MapWrapper";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 type WeatherPayload = {
   location: { lat: number; lon: number; address: string };
@@ -11,96 +20,94 @@ type WeatherPayload = {
     string,
     { value: number; uncertainty: number; confidence: string }
   >;
-  recommendations: string[];
+  recommendations?: string[];
 };
 
 export default function HomePage() {
-  const [weatherData, setWeatherData] = useState<WeatherPayload>({
-    location: { lat: 18.5204, lon: 73.8567, address: "Pune, MH" },
-    date: "2025-10-05",
-    probabilities: {
-      rain: { value: 0.3, uncertainty: 0.1, confidence: "medium" },
-      cloud_cover: { value: 0.6, uncertainty: 0.15, confidence: "high" },
-      temperature_hot: { value: 0.2, uncertainty: 0.05, confidence: "low" },
-    },
-    recommendations: ["Carry an umbrella", "Avoid outdoor meetings"],
-  });
+  const [weatherData, setWeatherData] = useState<WeatherPayload | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-background text-foreground">
       {/* Floating Weather Widget */}
-      <div className="absolute bottom-4 left-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
-        <WeatherCard {...weatherData} />
-      </div>
+      {weatherData && (
+        <div className="absolute bottom-4 left-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
+          <WeatherCard {...weatherData} />
+
+          {/* Date Selector */}
+          <div className="px-4 pb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  {selectedDate
+                    ? new Date(selectedDate).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Pick a forecast date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate ? new Date(selectedDate) : undefined}
+                  onSelect={(date) => {
+                    if (!date) return;
+
+                    // Convert to local date string (YYYY-MM-DD)
+                    const localDate = new Date(
+                      date.getFullYear(),
+                      date.getMonth(),
+                      date.getDate()
+                    ).toLocaleDateString("en-CA"); // en-CA gives YYYY-MM-DD
+
+                    setSelectedDate(localDate);
+                  }}
+                  disabled={(date) =>
+                    date < new Date(Date.now() + 24 * 60 * 60 * 1000)
+                  } // disable today and past
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      )}
 
       {/* Fullscreen Map */}
       <div className="absolute inset-0 z-0">
         <MapWrapper
-          onCitySelect={(cityName) => {
-            console.log("Clicked city:", cityName);
-            // Replace with actual fetch from backend
-            setWeatherData({
-              location: {
-                lat: 40.7,
-                lon: -74.0,
-                address: `${cityName}, NY`,
-              },
-              date: "2026-06-15",
-              probabilities: {
-                rain: { value: 0.45, uncertainty: 0.08, confidence: "medium" },
-                snow: { value: 0.02, uncertainty: 0.03, confidence: "high" },
-                cloud_cover: {
-                  value: 0.67,
-                  uncertainty: 0.12,
-                  confidence: "medium",
+          onCitySelect={async ({ city, lat, lon }) => {
+            console.log("Clicked city:", city);
+
+            const future = new Date();
+            future.setDate(future.getDate() + 2);
+            const date = future.toISOString().slice(0, 10);
+
+            try {
+              const res = await fetch(
+                `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
+              );
+              const data = await res.json();
+              console.log("API response:", data);
+
+              // ✅ Inject city name into location.address
+              const patchedData = {
+                ...data,
+                location: {
+                  ...data.location,
+                  address: city,
                 },
-                wind_speed_high: {
-                  value: 0.23,
-                  uncertainty: 0.06,
-                  confidence: "high",
-                },
-                temperature_hot: {
-                  value: 0.15,
-                  uncertainty: 0.07,
-                  confidence: "medium",
-                },
-                temperature_cold: {
-                  value: 0.08,
-                  uncertainty: 0.04,
-                  confidence: "high",
-                },
-                heat_wave: {
-                  value: 0.03,
-                  uncertainty: 0.02,
-                  confidence: "low",
-                },
-                cold_snap: {
-                  value: 0.05,
-                  uncertainty: 0.03,
-                  confidence: "medium",
-                },
-                heavy_rain: {
-                  value: 0.12,
-                  uncertainty: 0.05,
-                  confidence: "medium",
-                },
-                dust_event: {
-                  value: 0.01,
-                  uncertainty: 0.01,
-                  confidence: "low",
-                },
-                uncomfortable_index: {
-                  value: 0.18,
-                  uncertainty: 0.09,
-                  confidence: "low",
-                },
-              },
-              recommendations: [
-                "Consider indoor backup venue",
-                "Monitor forecasts closer to date",
-                "Plan for potential wet conditions",
-              ],
-            });
+              };
+
+              setWeatherData(patchedData);
+            } catch (err) {
+              console.error("Weather fetch failed:", err);
+            }
           }}
         />
       </div>

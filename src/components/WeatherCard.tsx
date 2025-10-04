@@ -14,7 +14,7 @@ type WeatherCardProps = {
     string,
     { value: number; uncertainty: number; confidence: string }
   >;
-  recommendations: string[];
+  recommendations?: string[];
 };
 
 export default function WeatherCard({
@@ -40,10 +40,15 @@ export default function WeatherCard({
   return (
     <Card className="w-full h-full bg-background text-foreground border-none">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{location.address}</CardTitle>
+        <CardTitle className="text-lg">
+          {location?.address ?? "Unknown Location"}
+        </CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
           Forecast for {date}
         </CardDescription>
+        <div className="text-xs text-muted-foreground mt-1">
+          📍 {location?.lat.toFixed(2)}, {location?.lon.toFixed(2)}
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -84,7 +89,7 @@ export default function WeatherCard({
         <div className="pt-2">
           <h3 className="text-sm font-semibold mb-1">Recommendations</h3>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            {recommendations.map((r, i) => (
+            {recommendations?.map((r, i) => (
               <li key={i}>{r}</li>
             ))}
           </ul>
