@@ -19,7 +19,7 @@ export default function Map({ onCitySelect }: Props) {
       style: "https://tiles.openfreemap.org/styles/bright",
       center: [78.4867, 17.385], // Hyderabad
       zoom: 5,
-      maxZoom: 8, // 🚫 Prevent zooming in too far
+      maxZoom: 7, // 🚫 Prevent zooming in too far
     });
 
     map.on("click", (e) => {
