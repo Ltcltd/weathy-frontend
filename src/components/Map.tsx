@@ -22,38 +22,18 @@ export default function Map({ onCitySelect }: Props) {
       maxZoom: 8, // 🚫 Prevent zooming in too far
     });
 
-    // 🖱️ Detect clicks on city labels
     map.on("click", (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ["poi_r20"],
-      });
+      const features = map.queryRenderedFeatures(e.point);
 
-      // Debug: log features on click
-      console.log(
-        "POI features:",
-        features.map((f) => f.properties)
+      const labelFeature = features.find(
+        (f) => f.layer.type === "symbol" && f.properties?.name // or f.properties?.text
       );
 
-      const cityFeature = features.find((f) => {
-        const name = f.properties?.name;
-        const kind = f.properties?.kind;
-        return (
-          typeof name === "string" && (kind === "city" || kind === "locality")
-        );
-      });
-
-      if (cityFeature) {
-        const cityName = cityFeature.properties!.name;
-        onCitySelect(cityName);
+      if (labelFeature) {
+        console.log("Clicked label:", labelFeature.properties.name);
+      } else {
+        console.log("No label found at click point");
       }
-    });
-
-    map.on("load", () => {
-      const layers = map.getStyle().layers;
-      console.log(
-        "Available layers:",
-        layers?.map((l) => l.id)
-      );
     });
 
     return () => map.remove();
