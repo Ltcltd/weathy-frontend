@@ -38,7 +38,7 @@ export default function WeatherCard({
   ];
 
   return (
-    <Card className="w-full h-full bg-background text-foreground border-none">
+    <Card className="w-full h-full bg-card text-foreground border-none">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">
           {location?.address ?? "Unknown Location"}
