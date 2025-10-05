@@ -10,9 +10,11 @@ type Props = {
 
 export default function Map({ onCitySelect }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<maplibregl.Map | null>(null);
+  const markerInstance = useRef<maplibregl.Marker | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || mapInstance.current) return;
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -22,8 +24,7 @@ export default function Map({ onCitySelect }: Props) {
       maxZoom: 7,
     });
 
-    // 🧠 Store the marker so we can update it
-    let marker: maplibregl.Marker | null = null;
+    mapInstance.current = map;
 
     map.on("click", (e) => {
       const features = map.queryRenderedFeatures(e.point);
@@ -43,10 +44,10 @@ export default function Map({ onCitySelect }: Props) {
         console.log(`Label coordinates: ${lat}, ${lon}`);
 
         // ✅ Drop or move the marker
-        if (marker) {
-          marker.setLngLat([lon, lat]);
+        if (markerInstance.current) {
+          markerInstance.current.setLngLat([lon, lat]);
         } else {
-          marker = new maplibregl.Marker({ color: "#f43f5e" }) // rose-500
+          markerInstance.current = new maplibregl.Marker({ color: "#f43f5e" })
             .setLngLat([lon, lat])
             .addTo(map);
         }
@@ -57,8 +58,12 @@ export default function Map({ onCitySelect }: Props) {
       }
     });
 
-    return () => map.remove();
-  }, [onCitySelect]);
+    return () => {
+      map.remove();
+      mapInstance.current = null;
+      markerInstance.current = null;
+    };
+  }, []); // ✅ Empty dependency array - only run once
 
   return (
     <div

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import WeatherCard from "@/components/WeatherCard";
 import MapWrapper from "./_components/MapWrapper";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,35 @@ type WeatherPayload = {
 export default function HomePage() {
   const [weatherData, setWeatherData] = useState<WeatherPayload | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const handleCitySelect = useCallback(async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
+    console.log("Clicked city:", city);
+
+    const future = new Date();
+    future.setDate(future.getDate() + 2);
+    const date = future.toISOString().slice(0, 10);
+
+    try {
+      const res = await fetch(
+        `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
+      );
+      const data = await res.json();
+      console.log("API response:", data);
+
+      // ✅ Inject city name into location.address
+      const patchedData = {
+        ...data,
+        location: {
+          ...data.location,
+          address: city,
+        },
+      };
+
+      setWeatherData(patchedData);
+    } catch (err) {
+      console.error("Weather fetch failed:", err);
+    }
+  }, []);
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-background text-foreground">
@@ -80,36 +109,7 @@ export default function HomePage() {
 
       {/* Fullscreen Map */}
       <div className="absolute inset-0 z-0">
-        <MapWrapper
-          onCitySelect={async ({ city, lat, lon }) => {
-            console.log("Clicked city:", city);
-
-            const future = new Date();
-            future.setDate(future.getDate() + 2);
-            const date = future.toISOString().slice(0, 10);
-
-            try {
-              const res = await fetch(
-                `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
-              );
-              const data = await res.json();
-              console.log("API response:", data);
-
-              // ✅ Inject city name into location.address
-              const patchedData = {
-                ...data,
-                location: {
-                  ...data.location,
-                  address: city,
-                },
-              };
-
-              setWeatherData(patchedData);
-            } catch (err) {
-              console.error("Weather fetch failed:", err);
-            }
-          }}
-        />
+        <MapWrapper onCitySelect={handleCitySelect} />
       </div>
     </main>
   );
