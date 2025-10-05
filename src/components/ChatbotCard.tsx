@@ -60,18 +60,20 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
 
   if (minimized) {
     return (
-      <button
+      <Button
+        variant="outline"
+        size="icon"
         onClick={() => setMinimized(false)}
-        className="fixed bottom-4 right-4 z-50 bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:scale-105 transition"
+        className="bg-background/80 backdrop-blur-sm animate-in fade-in-0 zoom-in-95 duration-300"
         aria-label="Open Chat"
       >
-        <MessageCircle className="w-5 h-5" />
-      </button>
+        <MessageCircle className="h-[1.2rem] w-[1.2rem]" />
+      </Button>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
+    <div className="w-[380px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border animate-in fade-in-0 zoom-in-95 duration-300">
       <Card className="bg-card text-card-foreground border-none w-full">
         <CardHeader className="flex justify-between items-center">
           <CardTitle className="text-lg">AI Chat</CardTitle>
@@ -121,7 +123,7 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
                 <Button
                   key={i}
                   variant="ghost"
-                  className="justify-start text-left text-muted-foreground"
+                  className="justify-start text-left text-muted-foreground whitespace-normal h-auto py-2"
                   onClick={() => sendMessage(q)}
                 >
                   {q}

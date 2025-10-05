@@ -173,7 +173,7 @@ export default function HomePage() {
 
       {/* Floating Chatbot Widget */}
       {chatbotData && (
-        <div className="absolute bottom-4 right-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
+        <div className="absolute bottom-4 right-4 z-10">
           <ChatbotCard initial={chatbotData} />
         </div>
       )}
