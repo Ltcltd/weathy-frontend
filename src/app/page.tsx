@@ -27,15 +27,14 @@ type WeatherPayload = {
 export default function HomePage() {
   const [weatherData, setWeatherData] = useState<WeatherPayload | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    city: string;
+    lat: number;
+    lon: number;
+  } | null>(null);
 
-  const handleCitySelect = useCallback(
-    async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
-      console.log("Clicked city:", city);
-
-      const future = new Date();
-      future.setDate(future.getDate() + 2);
-      const date = future.toISOString().slice(0, 10);
-
+  const fetchWeatherData = useCallback(
+    async (city: string, lat: number, lon: number, date: string) => {
       try {
         const res = await fetch(
           `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
@@ -58,6 +57,23 @@ export default function HomePage() {
       }
     },
     []
+  );
+
+  const handleCitySelect = useCallback(
+    async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
+      console.log("Clicked city:", city);
+
+      // Store the current location for future date changes
+      setCurrentLocation({ city, lat, lon });
+
+      const future = new Date();
+      future.setDate(future.getDate() + 1);
+      const date = future.toISOString().slice(0, 10);
+      
+      setSelectedDate(date);
+      await fetchWeatherData(city, lat, lon, date);
+    },
+    [fetchWeatherData]
   );
 
   return (
@@ -94,7 +110,7 @@ export default function HomePage() {
                   mode="single"
                   selected={selectedDate ? new Date(selectedDate) : undefined}
                   onSelect={(date) => {
-                    if (!date) return;
+                    if (!date || !currentLocation) return;
 
                     // Convert to local date string (YYYY-MM-DD)
                     const localDate = new Date(
@@ -104,6 +120,14 @@ export default function HomePage() {
                     ).toLocaleDateString("en-CA"); // en-CA gives YYYY-MM-DD
 
                     setSelectedDate(localDate);
+                    
+                    // Fetch weather data for the selected date
+                    fetchWeatherData(
+                      currentLocation.city,
+                      currentLocation.lat,
+                      currentLocation.lon,
+                      localDate
+                    );
                   }}
                   disabled={(date) =>
                     date < new Date(Date.now() + 24 * 60 * 60 * 1000)
