@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle } from "lucide-react"; // optional icon
 
 type ChatbotResponse = {
@@ -30,6 +30,12 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
   const [userInput, setUserInput] = useState("");
   const [followups, setFollowups] = useState(initial.followup_questions || []);
   const [minimized, setMinimized] = useState(false);
+
+  // Update chat when a new location is selected
+  useEffect(() => {
+    setChat([{ sender: "bot", message: initial.response }]);
+    setFollowups(initial.followup_questions || []);
+  }, [initial]);
 
   const sendMessage = async (message: string) => {
     if (!message.trim()) return;
