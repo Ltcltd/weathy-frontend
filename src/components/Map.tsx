@@ -37,7 +37,10 @@ export default function Map({ onCitySelect }: Props) {
       );
 
       if (labelFeature && labelFeature.geometry.type === "Point") {
-        const [lon, lat] = labelFeature.geometry.coordinates as [number, number];
+        const [lon, lat] = labelFeature.geometry.coordinates as [
+          number,
+          number
+        ];
         const label = labelFeature.properties.name;
 
         console.log(`Clicked label: ${label}`);
@@ -56,6 +59,19 @@ export default function Map({ onCitySelect }: Props) {
       } else {
         console.log("No label with coordinates found at click point");
       }
+    });
+
+    map.on("mousemove", (e) => {
+      const features = map.queryRenderedFeatures(e.point);
+
+      const isLabel = features.some(
+        (f) =>
+          f.layer.type === "symbol" &&
+          f.properties?.name &&
+          f.geometry.type === "Point"
+      );
+
+      map.getCanvas().style.cursor = isLabel ? "pointer" : "";
     });
 
     return () => {
