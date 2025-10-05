@@ -14,7 +14,6 @@ export default function Map({ onCitySelect }: Props) {
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const markerInstance = useRef<maplibregl.Marker | null>(null);
   const { resolvedTheme } = useTheme();
-  console.log("Current theme:", resolvedTheme);
   const [mounted, setMounted] = useState(false);
 
   // Handle client-side mounting
