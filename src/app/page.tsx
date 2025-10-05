@@ -69,7 +69,7 @@ export default function HomePage() {
       const future = new Date();
       future.setDate(future.getDate() + 1);
       const date = future.toISOString().slice(0, 10);
-      
+
       setSelectedDate(date);
       await fetchWeatherData(city, lat, lon, date);
     },
@@ -120,7 +120,7 @@ export default function HomePage() {
                     ).toLocaleDateString("en-CA"); // en-CA gives YYYY-MM-DD
 
                     setSelectedDate(localDate);
-                    
+
                     // Fetch weather data for the selected date
                     fetchWeatherData(
                       currentLocation.city,
