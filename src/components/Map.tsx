@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -12,13 +13,26 @@ export default function Map({ onCitySelect }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
   const markerInstance = useRef<maplibregl.Marker | null>(null);
+  const { resolvedTheme } = useTheme();
+  console.log("Current theme:", resolvedTheme);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || mapInstance.current) return;
+    if (!mapContainer.current || mapInstance.current || !mounted) return;
+
+    // Use resolvedTheme, fallback to light if not yet resolved
+    const initialStyle = resolvedTheme === "dark" 
+      ? "https://tiles.openfreemap.org/styles/dark"
+      : "https://tiles.openfreemap.org/styles/bright";
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: "https://tiles.openfreemap.org/styles/bright",
+      style: initialStyle,
       center: [78.4867, 17.385],
       zoom: 5,
       maxZoom: 7,
@@ -98,7 +112,18 @@ export default function Map({ onCitySelect }: Props) {
       mapInstance.current = null;
       markerInstance.current = null;
     };
-  }, []); // ✅ Empty dependency array - only run once
+  }, [mounted]); // ✅ Only depend on mounted
+
+  // 🌗 Update map style when theme changes
+  useEffect(() => {
+    if (!mapInstance.current || !resolvedTheme || !mounted) return;
+
+    const newStyle = resolvedTheme === "dark"
+      ? "https://tiles.openfreemap.org/styles/dark"
+      : "https://tiles.openfreemap.org/styles/bright";
+
+    mapInstance.current.setStyle(newStyle);
+  }, [resolvedTheme, mounted]);
 
   return (
     <div
