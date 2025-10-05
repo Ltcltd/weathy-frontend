@@ -28,34 +28,37 @@ export default function HomePage() {
   const [weatherData, setWeatherData] = useState<WeatherPayload | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const handleCitySelect = useCallback(async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
-    console.log("Clicked city:", city);
+  const handleCitySelect = useCallback(
+    async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
+      console.log("Clicked city:", city);
 
-    const future = new Date();
-    future.setDate(future.getDate() + 2);
-    const date = future.toISOString().slice(0, 10);
+      const future = new Date();
+      future.setDate(future.getDate() + 2);
+      const date = future.toISOString().slice(0, 10);
 
-    try {
-      const res = await fetch(
-        `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
-      );
-      const data = await res.json();
-      console.log("API response:", data);
+      try {
+        const res = await fetch(
+          `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
+        );
+        const data = await res.json();
+        console.log("API response:", data);
 
-      // ✅ Inject city name into location.address
-      const patchedData = {
-        ...data,
-        location: {
-          ...data.location,
-          address: city,
-        },
-      };
+        // ✅ Inject city name into location.address
+        const patchedData = {
+          ...data,
+          location: {
+            ...data.location,
+            address: city,
+          },
+        };
 
-      setWeatherData(patchedData);
-    } catch (err) {
-      console.error("Weather fetch failed:", err);
-    }
-  }, []);
+        setWeatherData(patchedData);
+      } catch (err) {
+        console.error("Weather fetch failed:", err);
+      }
+    },
+    []
+  );
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-background text-foreground">
@@ -75,7 +78,7 @@ export default function HomePage() {
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal bg-card"
                 >
                   {selectedDate
                     ? new Date(selectedDate).toLocaleDateString("en-IN", {
@@ -86,7 +89,7 @@ export default function HomePage() {
                     : "Pick a forecast date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0 bg-card">
                 <Calendar
                   mode="single"
                   selected={selectedDate ? new Date(selectedDate) : undefined}
