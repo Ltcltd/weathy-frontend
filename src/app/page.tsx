@@ -2,9 +2,8 @@
 
 import { useState, useCallback } from "react";
 import WeatherCard from "@/components/WeatherCard";
+import ChatbotCard from "@/components/ChatbotCard";
 import MapWrapper from "./_components/MapWrapper";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -24,14 +23,46 @@ type WeatherPayload = {
   recommendations?: string[];
 };
 
+type ChatbotResponse = {
+  response: string;
+  structured_data: {
+    location: { lat: number; lon: number; name: string };
+    date: string;
+    primary_concern: string;
+    probability: number;
+    confidence: string;
+  };
+  recommendations?: { type: string; priority: string }[];
+  followup_questions?: string[];
+};
+
 export default function HomePage() {
   const [weatherData, setWeatherData] = useState<WeatherPayload | null>(null);
+  const [chatbotData, setChatbotData] = useState<ChatbotResponse | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{
     city: string;
     lat: number;
     lon: number;
   } | null>(null);
+
+  const queryChatbot = useCallback(async (message: string) => {
+    try {
+      const res = await fetch(
+        "https://studybuddy.allanhanan.qzz.io/api/chatbot/query",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        }
+      );
+
+      const data = await res.json();
+      setChatbotData(data);
+    } catch (err) {
+      console.error("Chatbot query failed:", err);
+    }
+  }, []);
 
   const fetchWeatherData = useCallback(
     async (city: string, lat: number, lon: number, date: string) => {
@@ -42,7 +73,6 @@ export default function HomePage() {
         const data = await res.json();
         console.log("API response:", data);
 
-        // ✅ Inject city name into location.address
         const patchedData = {
           ...data,
           location: {
@@ -52,18 +82,20 @@ export default function HomePage() {
         };
 
         setWeatherData(patchedData);
+
+        // Auto-query chatbot based on first concern
+        const primaryConcern = Object.keys(patchedData.probabilities)[0];
+        const query = `Will it ${primaryConcern} in ${city} on ${date}?`;
+        queryChatbot(query);
       } catch (err) {
         console.error("Weather fetch failed:", err);
       }
     },
-    []
+    [queryChatbot]
   );
 
   const handleCitySelect = useCallback(
     async ({ city, lat, lon }: { city: string; lat: number; lon: number }) => {
-      console.log("Clicked city:", city);
-
-      // Store the current location for future date changes
       setCurrentLocation({ city, lat, lon });
 
       const future = new Date();
@@ -87,8 +119,6 @@ export default function HomePage() {
       {weatherData && (
         <div className="absolute bottom-4 left-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
           <WeatherCard {...weatherData} />
-
-          {/* Date Selector */}
           <div className="px-4 pb-4">
             <Popover>
               <PopoverTrigger asChild>
@@ -112,16 +142,14 @@ export default function HomePage() {
                   onSelect={(date) => {
                     if (!date || !currentLocation) return;
 
-                    // Convert to local date string (YYYY-MM-DD)
                     const localDate = new Date(
                       date.getFullYear(),
                       date.getMonth(),
                       date.getDate()
-                    ).toLocaleDateString("en-CA"); // en-CA gives YYYY-MM-DD
+                    ).toLocaleDateString("en-CA");
 
                     setSelectedDate(localDate);
 
-                    // Fetch weather data for the selected date
                     fetchWeatherData(
                       currentLocation.city,
                       currentLocation.lat,
@@ -134,12 +162,19 @@ export default function HomePage() {
                     tomorrow.setHours(0, 0, 0, 0);
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     return date < tomorrow;
-                  }} // disable today and past dates
+                  }}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
           </div>
+        </div>
+      )}
+
+      {/* Floating Chatbot Widget */}
+      {chatbotData && (
+        <div className="absolute bottom-4 right-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
+          <ChatbotCard initial={chatbotData} />
         </div>
       )}
 

@@ -26,9 +26,10 @@ export default function Map({ onCitySelect }: Props) {
     if (!mapContainer.current || mapInstance.current || !mounted) return;
 
     // Use resolvedTheme, fallback to light if not yet resolved
-    const initialStyle = resolvedTheme === "dark" 
-      ? "https://tiles.openfreemap.org/styles/dark"
-      : "https://tiles.openfreemap.org/styles/bright";
+    const initialStyle =
+      resolvedTheme === "dark"
+        ? "https://tiles.openfreemap.org/styles/dark"
+        : "https://tiles.openfreemap.org/styles/bright";
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -36,6 +37,7 @@ export default function Map({ onCitySelect }: Props) {
       center: [78.4867, 17.385],
       zoom: 5,
       maxZoom: 7,
+      attributionControl: false,
     });
 
     mapInstance.current = map;
@@ -118,9 +120,10 @@ export default function Map({ onCitySelect }: Props) {
   useEffect(() => {
     if (!mapInstance.current || !resolvedTheme || !mounted) return;
 
-    const newStyle = resolvedTheme === "dark"
-      ? "https://tiles.openfreemap.org/styles/dark"
-      : "https://tiles.openfreemap.org/styles/bright";
+    const newStyle =
+      resolvedTheme === "dark"
+        ? "https://tiles.openfreemap.org/styles/dark"
+        : "https://tiles.openfreemap.org/styles/bright";
 
     mapInstance.current.setStyle(newStyle);
   }, [resolvedTheme, mounted]);
