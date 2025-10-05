@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState } from "react";
+import { MessageCircle } from "lucide-react"; // optional icon
 
 type ChatbotResponse = {
   response: string;
@@ -28,6 +29,7 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
   ]);
   const [userInput, setUserInput] = useState("");
   const [followups, setFollowups] = useState(initial.followup_questions || []);
+  const [minimized, setMinimized] = useState(false);
 
   const sendMessage = async (message: string) => {
     if (!message.trim()) return;
@@ -56,66 +58,88 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
     }
   };
 
-  return (
-    <Card className="bg-card text-card-foreground border-none w-full">
-      <CardHeader>
-        <CardTitle className="text-lg">AI Chat</CardTitle>
-      </CardHeader>
+  if (minimized) {
+    return (
+      <button
+        onClick={() => setMinimized(false)}
+        className="fixed bottom-4 right-4 z-50 bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:scale-105 transition"
+        aria-label="Open Chat"
+      >
+        <MessageCircle className="w-5 h-5" />
+      </button>
+    );
+  }
 
-      <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto">
-        {chat.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex items-start gap-2 ${
-              msg.sender === "user" ? "justify-end" : ""
-            }`}
+  return (
+    <div className="fixed bottom-4 right-4 z-50 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
+      <Card className="bg-card text-card-foreground border-none w-full">
+        <CardHeader className="flex justify-between items-center">
+          <CardTitle className="text-lg">AI Chat</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setMinimized(true)}
+            className="text-muted-foreground"
           >
-            {msg.sender === "bot" && (
-              <Avatar>
-                <AvatarFallback>🤖</AvatarFallback>
-              </Avatar>
-            )}
+            Minimize
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto">
+          {chat.map((msg, i) => (
             <div
-              className={`rounded-lg px-3 py-2 text-sm max-w-[75%] ${
-                msg.sender === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+              key={i}
+              className={`flex items-start gap-2 ${
+                msg.sender === "user" ? "justify-end" : ""
               }`}
             >
-              {msg.message}
-            </div>
-            {msg.sender === "user" && (
-              <Avatar>
-                <AvatarFallback>🧑</AvatarFallback>
-              </Avatar>
-            )}
-          </div>
-        ))}
-
-        {followups.length > 0 && (
-          <div className="flex flex-col gap-2 pt-2">
-            {followups.map((q, i) => (
-              <Button
-                key={i}
-                variant="ghost"
-                className="justify-start text-left text-muted-foreground"
-                onClick={() => sendMessage(q)}
+              {msg.sender === "bot" && (
+                <Avatar>
+                  <AvatarFallback>🤖</AvatarFallback>
+                </Avatar>
+              )}
+              <div
+                className={`rounded-lg px-3 py-2 text-sm max-w-[75%] ${
+                  msg.sender === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
               >
-                {q}
-              </Button>
-            ))}
-          </div>
-        )}
-      </CardContent>
+                {msg.message}
+              </div>
+              {msg.sender === "user" && (
+                <Avatar>
+                  <AvatarFallback>🧑</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          ))}
 
-      <CardFooter className="flex gap-2">
-        <Input
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          placeholder="Ask something..."
-        />
-        <Button onClick={() => sendMessage(userInput)}>Send</Button>
-      </CardFooter>
-    </Card>
+          {followups.length > 0 && (
+            <div className="flex flex-col gap-2 pt-2">
+              {followups.map((q, i) => (
+                <Button
+                  key={i}
+                  variant="ghost"
+                  className="justify-start text-left text-muted-foreground"
+                  onClick={() => sendMessage(q)}
+                >
+                  {q}
+                </Button>
+              ))}
+            </div>
+          )}
+        </CardContent>
+
+        <CardFooter className="flex gap-2">
+          <Input
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            placeholder="Ask something..."
+          />
+          <Button onClick={() => sendMessage(userInput)}>Send</Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
