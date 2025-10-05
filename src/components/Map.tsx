@@ -17,10 +17,13 @@ export default function Map({ onCitySelect }: Props) {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: "https://tiles.openfreemap.org/styles/bright",
-      center: [78.4867, 17.385], // Hyderabad
+      center: [78.4867, 17.385],
       zoom: 5,
-      maxZoom: 7, // 🚫 Prevent zooming in too far
+      maxZoom: 7,
     });
+
+    // 🧠 Store the marker so we can update it
+    let marker: maplibregl.Marker | null = null;
 
     map.on("click", (e) => {
       const features = map.queryRenderedFeatures(e.point);
@@ -41,6 +44,15 @@ export default function Map({ onCitySelect }: Props) {
 
         console.log(`Clicked label: ${label}`);
         console.log(`Label coordinates: ${lat}, ${lon}`);
+
+        // ✅ Drop or move the marker
+        if (marker) {
+          marker.setLngLat([lon, lat]);
+        } else {
+          marker = new maplibregl.Marker({ color: "#f43f5e" }) // rose-500
+            .setLngLat([lon, lat])
+            .addTo(map);
+        }
 
         onCitySelect({ city: label, lat, lon });
       } else {
