@@ -129,9 +129,12 @@ export default function HomePage() {
                       localDate
                     );
                   }}
-                  disabled={(date) =>
-                    date < new Date(Date.now() + 24 * 60 * 60 * 1000)
-                  } // disable today and past
+                  disabled={(date) => {
+                    const tomorrow = new Date();
+                    tomorrow.setHours(0, 0, 0, 0);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return date < tomorrow;
+                  }} // disable today and past dates
                   initialFocus
                 />
               </PopoverContent>
