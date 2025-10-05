@@ -12,6 +12,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type WeatherPayload = {
   location: { lat: number; lon: number; address: string };
@@ -58,6 +59,11 @@ export default function HomePage() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-background text-foreground">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-10">
+        <ThemeToggle />
+      </div>
+
       {/* Floating Weather Widget */}
       {weatherData && (
         <div className="absolute bottom-4 left-4 z-10 w-[320px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border">
