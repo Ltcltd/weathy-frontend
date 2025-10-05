@@ -61,17 +61,36 @@ export default function Map({ onCitySelect }: Props) {
       }
     });
 
+    const hoverMarker = new maplibregl.Marker({
+      color: "#f43f5e",
+      scale: 0.5, // smaller than click marker
+    })
+      .setLngLat([0, 0])
+      .addTo(map);
+    hoverMarker.getElement().style.display = "none"; // hide initially
+
     map.on("mousemove", (e) => {
       const features = map.queryRenderedFeatures(e.point);
 
-      const isLabel = features.some(
+      const labelFeature = features.find(
         (f) =>
           f.layer.type === "symbol" &&
           f.properties?.name &&
           f.geometry.type === "Point"
       );
 
-      map.getCanvas().style.cursor = isLabel ? "pointer" : "";
+      if (labelFeature && labelFeature.geometry.type === "Point") {
+        const [lon, lat] = labelFeature.geometry.coordinates as [
+          number,
+          number
+        ];
+        hoverMarker.setLngLat([lon, lat]);
+        hoverMarker.getElement().style.display = "block";
+        map.getCanvas().style.cursor = "pointer";
+      } else {
+        hoverMarker.getElement().style.display = "none";
+        map.getCanvas().style.cursor = "";
+      }
     });
 
     return () => {
