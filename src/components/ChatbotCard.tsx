@@ -79,8 +79,8 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
   }
 
   return (
-    <div className="w-[380px] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg bg-card border animate-in fade-in-0 zoom-in-95 duration-300">
-      <Card className="bg-card text-card-foreground border-none w-full">
+    <div className="w-[380px] max-h-[80vh] flex flex-col rounded-lg shadow-lg bg-card border animate-in fade-in-0 zoom-in-95 duration-300">
+      <Card className="bg-card text-card-foreground border-none w-full flex flex-col h-full overflow-hidden">
         <CardHeader className="flex justify-between items-center">
           <CardTitle className="text-lg">AI Chat</CardTitle>
           <Button
@@ -93,7 +93,7 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4 max-h-[60vh] overflow-y-auto">
+        <CardContent className="space-y-4 flex-1 overflow-y-auto">
           {chat.map((msg, i) => (
             <div
               key={i}
@@ -143,6 +143,12 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
           <Input
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage(userInput);
+              }
+            }}
             placeholder="Ask something..."
           />
           <Button onClick={() => sendMessage(userInput)}>Send</Button>
