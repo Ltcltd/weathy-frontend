@@ -36,11 +36,8 @@ export default function Map({ onCitySelect }: Props) {
       );
 
       if (labelFeature && labelFeature.geometry.type === "Point") {
-        let coord = labelFeature.geometry.coordinates as [number, number];
-        const coords = [Math.round(coord[0]), Math.round(coord[1])];
+        const [lon, lat] = labelFeature.geometry.coordinates as [number, number];
         const label = labelFeature.properties.name;
-        const lat = coords[1];
-        const lon = coords[0];
 
         console.log(`Clicked label: ${label}`);
         console.log(`Label coordinates: ${lat}, ${lon}`);
