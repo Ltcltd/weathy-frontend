@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = "http://buffnux-vm.southindia.cloudapp.azure.com";
+export const API_BASE_URL = "https://api.weathy.earth";
 
 // API Endpoints
 export const API_ENDPOINTS = {
