@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = "https://api.weathy.earth";
+export const API_BASE_URL = "https://api.weathy.earth:8000";
 
 // API Endpoints
 export const API_ENDPOINTS = {
