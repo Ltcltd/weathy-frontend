@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { API_ENDPOINTS } from "@/lib/api";
 
 type WeatherPayload = {
   location: { lat: number; lon: number; address: string };
@@ -48,14 +49,11 @@ export default function HomePage() {
 
   const queryChatbot = useCallback(async (message: string) => {
     try {
-      const res = await fetch(
-        "https://studybuddy.allanhanan.qzz.io/api/chatbot/query",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
-        }
-      );
+      const res = await fetch(API_ENDPOINTS.chatbot.query, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
 
       const data = await res.json();
       setChatbotData(data);
@@ -67,9 +65,7 @@ export default function HomePage() {
   const fetchWeatherData = useCallback(
     async (city: string, lat: number, lon: number, date: string) => {
       try {
-        const res = await fetch(
-          `https://studybuddy.allanhanan.qzz.io/api/map/probability/${lat}/${lon}/${date}`
-        );
+        const res = await fetch(API_ENDPOINTS.map.probability(lat, lon, date));
         const data = await res.json();
         console.log("API response:", data);
 

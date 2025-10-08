@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { MessageCircle } from "lucide-react"; // optional icon
+import { API_ENDPOINTS } from "@/lib/api";
 
 type ChatbotResponse = {
   response: string;
@@ -44,14 +45,11 @@ export default function ChatbotCard({ initial }: { initial: ChatbotResponse }) {
     setUserInput("");
 
     try {
-      const res = await fetch(
-        "https://studybuddy.allanhanan.qzz.io/api/chatbot/query",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
-        }
-      );
+      const res = await fetch(API_ENDPOINTS.chatbot.query, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
 
       const data: ChatbotResponse = await res.json();
       setChat((prev) => [...prev, { sender: "bot", message: data.response }]);
