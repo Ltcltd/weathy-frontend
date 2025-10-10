@@ -47,20 +47,38 @@ export default function HomePage() {
     lon: number;
   } | null>(null);
 
-  const queryChatbot = useCallback(async (message: string) => {
+  const queryChatbot = useCallback(async (
+    message: string,
+    locationContext?: { lat: number; lon: number; name: string; date: string }
+  ) => {
     try {
+      const body = {
+        message,
+        ...(locationContext && {
+          context: {
+            clicked_location: {
+              lat: locationContext.lat,
+              lon: locationContext.lon,
+              name: locationContext.name
+            },
+            date: locationContext.date
+          }
+        })
+      };
+  
       const res = await fetch(API_ENDPOINTS.chatbot.query, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify(body),
       });
-
+  
       const data = await res.json();
       setChatbotData(data);
     } catch (err) {
       console.error("Chatbot query failed:", err);
     }
   }, []);
+
 
   const fetchWeatherData = useCallback(
     async (city: string, lat: number, lon: number, date: string) => {
@@ -82,7 +100,7 @@ export default function HomePage() {
         // Auto-query chatbot based on first concern
         const primaryConcern = Object.keys(patchedData.probabilities)[0];
         const query = `Will it ${primaryConcern} in ${city} on ${date}?`;
-        queryChatbot(query);
+        queryChatbot(query, { lat, lon, name: city, date });
       } catch (err) {
         console.error("Weather fetch failed:", err);
       }
